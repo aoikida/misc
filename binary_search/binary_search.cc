@@ -1,13 +1,13 @@
-#include <stdio.h>
+#include <iostream>
+#include <vector>
+using namespace std;
 
-int binary_search(int data[], int min, int max, int key){
+int binary_search(vector<int> data, int min, int max, int key){
 
-  while (1){
+  while (max >= min){
     int mid = min + (max - min) / 2; //avoid max+min exceeding maximum value of int
     if (data[mid] == key)
       return mid;
-    else if (min == max)
-      printf("Not Found %d\n", key);
     else if (data[mid] > key)
       max = mid - 1;
     else if (data[mid] < key)
@@ -19,18 +19,17 @@ int binary_search(int data[], int min, int max, int key){
 
 int main(void){
 
-  int array[100];
-  int size = sizeof(array) / sizeof(int);
+  vector<int> A(100);
 
-  for (int i = 0; i< size; ++i){
-    array[i] = i + 1;
+  for (int i = 0; i< A.size(); ++i){
+    A[i] = i + 1;
   }
 
-  int min = 0, max = size - 1;
+  int min = 0, max = (int)A.size() - 1;
 
-  for (int i = 0; i<size; ++i){
-    int num = array[i];
-    printf("%d\n", binary_search(array, min, max, num)+1);
+  for (int i = 0; i<A.size(); ++i){
+    int num = A[i];
+    printf("%d\n", binary_search(A, min, max, num)+1);
   }
 
   return 0;
