@@ -2,20 +2,20 @@
 #include <vector>
 using namespace std;
 
-void MergeSort(vector<int> &a, int left, int right) {
+void MergeSort(vector<int> &A, int left, int right) {
 
     //これ以上分割できない地点
     if (right - left == 1)return;
     int middle = left + (right - left) / 2;
 
     //左半分をsort
-    MergeSort(a, left, middle);
+    MergeSort(A, left, middle);
     //右半分をsort
-    MergeSort(a, middle, right);
+    MergeSort(A, middle, right);
 
     vector<int> buf;
-    for(int i = left; i < middle; ++i) buf.push_back(a[i]);
-    for(int i = right - 1; i >= middle; --i) buf.push_back(a[i]);
+    for(int i = left; i < middle; ++i) buf.push_back(A[i]);
+    for(int i = right - 1; i >= middle; --i) buf.push_back(A[i]);
 
     //左と右を併合する
     int index_left = 0; //左側の添字
@@ -24,11 +24,11 @@ void MergeSort(vector<int> &a, int left, int right) {
     for(int i = left; i < right; ++i) {
         //左側採用
         if (buf[index_left] <= buf[index_right]) {
-            a[i] = buf[index_left++];
+            A[i] = buf[index_left++];
         }
         //右側採用
         else {
-            a[i] = buf[index_right--];
+            A[i] = buf[index_right--];
         }
     }
 }
