@@ -142,6 +142,39 @@ insert_in_internal(NODE *internal, int key, DATA *data)
 	return;
 }
 
+void
+insert_in_temp_internal(TEMP *internal, int key, DATA *data)
+{
+	int i;
+
+	if (key < internal->key[0]) {
+		for (i = internal->nkey; i > 0; i--) {
+			internal->key[i] = internal->key[i-1];
+			internal->chi[i+1] = internal->chi[i];
+		}
+		internal->key[0] = key;
+		internal->chi[1] = (NODE*)data;
+
+	}
+	else {
+		for (i = 0; i < internal->nkey; i++) {
+			if (key < internal->key[i]) break;
+		}
+		for (int j = internal->nkey; j > i; j--) {
+			internal->key[j] = internal->key[j-1];
+			internal->chi[j+1] = internal->chi[j];
+		}
+
+		internal->key[i] = key;
+		internal->chi[i+1] = (NODE*)data;
+
+	}
+
+	internal->nkey++;
+
+	return;
+}
+
 NODE *
 insert_in_parent(NODE *leaf, int parent_key, NODE *new_leaf)
 {	
@@ -162,8 +195,8 @@ insert_in_parent(NODE *leaf, int parent_key, NODE *new_leaf)
 		return parent_node;
 	}
 
-	parent_node = Root;
-	new_leaf->parent = Root;
+	parent_node = leaf->parent;
+	new_leaf->parent = parent_node;
 
 	if (parent_node->nkey < N - 1){
 		//debag
@@ -181,21 +214,28 @@ insert_in_parent(NODE *leaf, int parent_key, NODE *new_leaf)
 	else { //ここがおかしい
 
 		TEMP *temp_block = (TEMP*)alloc_leaf(NULL);
-		temp_block->isLeaf = true;
 
 		for(i = 0; i < N - 1; i++){
 			temp_block->key[i] = parent_node->key[i];
-			parent_node->key[i] = 0;
 		}
 		for(i = 0; i < N; i++){
 			temp_block->chi[i] = parent_node->chi[i];
-			parent_node->chi[i] = 0;
 		}
+		
 
-		insert_in_leaf((NODE *)temp_block, parent_key, (DATA *)new_leaf);
+		temp_block->nkey = 3;
+
+		insert_in_temp_internal(temp_block, parent_key, (DATA *)new_leaf);
 		
 		NODE *new_parent_node = alloc_leaf(NULL);
 		new_parent_node->isLeaf = false;
+
+		for(i = 0; i < N - 1; i++){
+			parent_node->key[i] = 0;
+		}
+		for(i = 0; i < N; i++){
+			parent_node->chi[i] = 0;
+		}
 
 		for(i = 0; i < (N/2); i++){
 			parent_node->key[i] = temp_block->key[i];
@@ -294,6 +334,7 @@ insert(int key, DATA *data)
 		}
 		new_leaf->nkey = 2;
 		new_leaf->isLeaf = true;
+		new_leaf->parent = leaf->parent;
 		
 		free(temp_block);
 		temp_block = NULL;
